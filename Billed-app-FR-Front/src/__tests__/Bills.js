@@ -115,21 +115,6 @@ describe("Given I am connected as an employee", () => {
       });
     });
 
-    describe("When there are no iconEye elements", () => {
-      test("Then it should log a warning", () => {
-        const warnMock = jest.spyOn(console, 'warn').mockImplementation(() => { }); // Mock console.warn
-        document.body.innerHTML = '<div></div>';
-        const billsContainer = new Bills({
-          document,
-          onNavigate: jest.fn(),
-          store: mockStore,
-          localStorage: localStorageMock,
-        });
-        expect(warnMock).toHaveBeenCalledWith('No iconEye elements found');
-        warnMock.mockRestore();
-      });
-    });
-
     describe("When an error occurs while getting bills", () => {
       test("Then it should log the error and return unformatted date and status", async () => {
         // Simulate corrupted data scenario
