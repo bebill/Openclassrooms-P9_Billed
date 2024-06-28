@@ -3,7 +3,7 @@ import ErrorPage from "./ErrorPage.js"
 import LoadingPage from "./LoadingPage.js"
 
 import Actions from './Actions.js'
-import { formatDate } from '../app/format.js'
+import { formatDate, formatStatus } from '../app/format.js'
 
 const row = (bill) => {
   return (`
@@ -12,7 +12,7 @@ const row = (bill) => {
       <td>${bill.name}</td>
       <td data-testid="bill-date" data-date="${bill.date}">${formatDate(bill.date)}</td>
       <td>${bill.amount} €</td>
-      <td>${bill.status}</td>
+      <td>${formatStatus(bill.status)}</td>
       <td>
         ${Actions(bill.fileUrl)}
       </td>

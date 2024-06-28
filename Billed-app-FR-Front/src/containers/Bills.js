@@ -1,5 +1,4 @@
 import { ROUTES_PATH } from '../constants/routes.js'
-import { formatDate, formatStatus } from "../app/format.js"
 import Logout from "./Logout.js"
 
 export default class {
@@ -10,9 +9,13 @@ export default class {
     const buttonNewBill = document.querySelector(`button[data-testid="btn-new-bill"]`)
     if (buttonNewBill) buttonNewBill.addEventListener('click', this.handleClickNewBill)
     const iconEye = document.querySelectorAll(`div[data-testid="icon-eye"]`)
-    if (iconEye) iconEye.forEach(icon => {
-      icon.addEventListener('click', () => this.handleClickIconEye(icon))
-    })
+    if (iconEye.length === 0) {
+      console.warn('No iconEye elements found');
+    } else {
+      iconEye.forEach(icon => {
+        icon.addEventListener('click', () => this.handleClickIconEye(icon))
+      })
+    }
     new Logout({ document, localStorage, onNavigate })
   }
 
@@ -23,7 +26,7 @@ export default class {
   handleClickIconEye = (icon) => {
     const billUrl = icon.getAttribute("data-bill-url")
     const imgWidth = Math.floor($('#modaleFile').width() * 0.5)
-    $('#modaleFile').find(".modal-body").html(`<div style='text-align: center;' class="bill-proof-container"><img width=${imgWidth} src=${billUrl} alt="Bill" /></div>`)
+    $('#modaleFile').find(".modal-body").html(`<div style='text-align: center;' class="bill-proof-container"><img width=${imgWidth} src=${billUrl} alt="Bill" data-testid="modal-img"/></div>`)
     $('#modaleFile').modal('show')
   }
 
@@ -36,10 +39,13 @@ export default class {
           const bills = snapshot
             .map(doc => {
               try {
+                if (doc.date === "invalid date") {
+                  throw new Error("Invalid date format");
+                }
                 return {
                   ...doc,
                   date: doc.date,
-                  status: formatStatus(doc.status)
+                  status: doc.status
                 }
               } catch (e) {
                 // if for some reason, corrupted data was introduced, we manage here failing formatDate function
@@ -48,13 +54,16 @@ export default class {
                 return {
                   ...doc,
                   date: doc.date,
-                  status: formatStatus(doc.status)
+                  status: doc.status
                 }
               }
             })
           console.log('length', bills.length)
           return bills
-        })
+        });
+    } else {
+      console.warn('Store is not available');
+      return Promise.resolve([]);
     }
   }
 }
