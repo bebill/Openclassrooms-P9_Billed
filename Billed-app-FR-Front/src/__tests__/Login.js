@@ -115,6 +115,58 @@ describe("Given that I am a user on login page", () => {
       expect(screen.getAllByText("Mes notes de frais")).toBeTruthy();
     });
   });
+
+  describe("When the login fails", () => {
+    test("Then the createUser method should be called for an Employee", async () => {
+      document.body.innerHTML = LoginUI();
+
+      const inputData = {
+        email: "johndoe@email.com",
+        password: "azerty",
+      };
+
+      const inputEmailUser = screen.getByTestId("employee-email-input");
+      fireEvent.change(inputEmailUser, { target: { value: inputData.email } });
+      const inputPasswordUser = screen.getByTestId("employee-password-input");
+      fireEvent.change(inputPasswordUser, { target: { value: inputData.password } });
+
+      const form = screen.getByTestId("form-employee");
+
+      const onNavigate = (pathname) => {
+        document.body.innerHTML = ROUTES({ pathname });
+      };
+
+      let PREVIOUS_LOCATION = "";
+      const store = {
+        login: jest.fn().mockRejectedValue(new Error("Login failed")),
+        users: jest.fn().mockReturnThis(),
+        create: jest.fn().mockResolvedValue({}),
+      };
+
+      const login = new Login({
+        document,
+        localStorage: window.localStorage,
+        onNavigate,
+        PREVIOUS_LOCATION,
+        store,
+      });
+
+      login.createUser = jest.fn().mockResolvedValue({});
+      const handleSubmit = jest.fn(login.handleSubmitEmployee);
+      form.addEventListener("submit", handleSubmit);
+      fireEvent.submit(form);
+
+      expect(store.login).toHaveBeenCalled();
+      await waitFor(() => {
+        expect(login.createUser).toHaveBeenCalledWith({
+          type: "Employee",
+          email: inputData.email,
+          password: inputData.password,
+          status: "connected",
+        });
+      });
+    });
+  });
 });
 
 describe("Given that I am a user on login page", () => {
@@ -225,6 +277,58 @@ describe("Given that I am a user on login page", () => {
 
     test("It should renders HR dashboard page", () => {
       expect(screen.queryByText("Validations")).toBeTruthy();
+    });
+  });
+
+  describe("When the login fails", () => {
+    test("Then the createUser method should be called for an Admin", async () => {
+      document.body.innerHTML = LoginUI();
+
+      const inputData = {
+        email: "admin@email.com",
+        password: "adminpassword",
+      };
+
+      const inputEmailUser = screen.getByTestId("admin-email-input");
+      fireEvent.change(inputEmailUser, { target: { value: inputData.email } });
+      const inputPasswordUser = screen.getByTestId("admin-password-input");
+      fireEvent.change(inputPasswordUser, { target: { value: inputData.password } });
+
+      const form = screen.getByTestId("form-admin");
+
+      const onNavigate = (pathname) => {
+        document.body.innerHTML = ROUTES({ pathname });
+      };
+
+      let PREVIOUS_LOCATION = "";
+      const store = {
+        login: jest.fn().mockRejectedValue(new Error("Login failed")),
+        users: jest.fn().mockReturnThis(),
+        create: jest.fn().mockResolvedValue({}),
+      };
+
+      const login = new Login({
+        document,
+        localStorage: window.localStorage,
+        onNavigate,
+        PREVIOUS_LOCATION,
+        store,
+      });
+
+      login.createUser = jest.fn().mockResolvedValue({});
+      const handleSubmit = jest.fn(login.handleSubmitAdmin);
+      form.addEventListener("submit", handleSubmit);
+      fireEvent.submit(form);
+
+      expect(store.login).toHaveBeenCalled();
+      await waitFor(() => {
+        expect(login.createUser).toHaveBeenCalledWith({
+          type: "Admin",
+          email: inputData.email,
+          password: inputData.password,
+          status: "connected",
+        });
+      });
     });
   });
 });
