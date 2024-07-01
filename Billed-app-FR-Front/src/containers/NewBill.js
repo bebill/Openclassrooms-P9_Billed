@@ -53,9 +53,8 @@ export default class NewBill {
   handleSubmit = e => {
     e.preventDefault()
     console.log('e.target.querySelector(`input[data-testid="datepicker"]`).value', e.target.querySelector(`input[data-testid="datepicker"]`).value)
-    const email = JSON.parse(localStorage.getItem("user")).email
     const bill = {
-      email,
+      email: JSON.parse(localStorage.getItem("user")).email,
       type: e.target.querySelector(`select[data-testid="expense-type"]`).value,
       name: e.target.querySelector(`input[data-testid="expense-name"]`).value,
       amount: parseInt(e.target.querySelector(`input[data-testid="amount"]`).value),
@@ -67,8 +66,12 @@ export default class NewBill {
       fileName: this.fileName,
       status: 'pending'
     }
-    this.updateBill(bill)
-    this.onNavigate(ROUTES_PATH['Bills'])
+    if (this.billId) {
+      this.updateBill(bill)
+      this.onNavigate(ROUTES_PATH['Bills'])
+    } else {
+      alert("Veuillez soumettre un fichier avant de continuer.")
+    }
   }
 
   // not need to cover this function by tests
