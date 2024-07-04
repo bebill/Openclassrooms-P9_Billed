@@ -11,10 +11,10 @@ export const filteredBills = (data, status) => {
       let selectCondition
 
       // in jest environment
+      /* istanbul ignore else */
       if (typeof jest !== 'undefined') {
         selectCondition = (bill.status === status)
       }
-      /* istanbul ignore next */
       else {
         // in prod environment
         const userEmail = JSON.parse(localStorage.getItem("user")).email
@@ -29,10 +29,8 @@ export const filteredBills = (data, status) => {
 
 export const card = (bill) => {
   const firstAndLastNames = bill.email.split('@')[0]
-  const firstName = firstAndLastNames.includes('.') ?
-    firstAndLastNames.split('.')[0] : ''
-  const lastName = firstAndLastNames.includes('.') ?
-    firstAndLastNames.split('.')[1] : firstAndLastNames
+  const firstName = firstAndLastNames.includes('.') ? firstAndLastNames.split('.')[0] : ''
+  const lastName = firstAndLastNames.includes('.') ? firstAndLastNames.split('.')[1] : firstAndLastNames
 
   return (`
     <div class='bill-card' id='open-bill${bill.id}' data-testid='open-bill${bill.id}'>

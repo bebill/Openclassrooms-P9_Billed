@@ -64,19 +64,19 @@ const mockedBills = {
   },
   create(bill) {
     return Promise.resolve({
+      "id": '1234',
+      "vat": bill.vat,
+      "fileUrl": bill.fileUrl,
+      "status": bill.status,
       "type": bill.type,
+      "commentary": bill.commentary,
       "name": bill.name,
+      "fileName": bill.fileUrl,
       "date": bill.date,
       "amount": bill.amount,
-      "vat": bill.vat,
-      "pct": bill.pct,
-      "commentary": bill.commentary,
-      "fileName": bill.fileUrl,
-      "fileUrl": bill.fileUrl,
-      "id": '1234',
-      "email": bill.email,
-      "status": bill.status,
       "commentAdmin": "",
+      "email": bill.email,
+      "pct": bill.pct,
     })
   },
   update(bill) {

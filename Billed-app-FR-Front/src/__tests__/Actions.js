@@ -4,7 +4,7 @@
 
 import { screen } from "@testing-library/dom"
 import Actions from "../views/Actions.js"
-import '@testing-library/jest-dom/extend-expect'
+import '@testing-library/jest-dom/extend-expect.js'
 
 
 describe('Given I am connected as an Employee', () => {
