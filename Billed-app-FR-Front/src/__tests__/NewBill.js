@@ -189,4 +189,74 @@ describe("Given I am connected as an employee", () => {
     });
   });
 
+  describe("When I am on NewBill Page, i want to submit but an error appears", () => {
+    beforeEach(() => {
+      window.localStorage.setItem(
+        "user",
+        JSON.stringify({
+          type: "Employee",
+          email: "a@a",
+        })
+      );
+      document.body.innerHTML = NewBillUI();
+    });
+    afterEach(() => {
+      document.body.innerHTML = "";
+      jest.clearAllMocks();
+    });
+    test("Fetch fails with 404 error message", async () => {
+      const store = {
+        bills: jest.fn().mockImplementation(() => newBill.store),
+        create: jest.fn().mockImplementation(() => Promise.resolve({})),
+        update: jest
+          .fn()
+          .mockImplementation(() => Promise.reject(new Error("404"))),
+      };
+      const newBill = new NewBill({
+        document,
+        onNavigate: (pathname) => {
+          document.body.innerHTML = ROUTES({ pathname });
+        },
+        store,
+        localStorage: window.localStorage,
+      });
+      newBill.isFormImgValid = true;
+
+      const form = screen.getByTestId("form-new-bill");
+      const handleSubmit = jest.fn((e) => newBill.handleSubmit(e));
+      form.addEventListener("submit", handleSubmit);
+
+      fireEvent.submit(form);
+      await new Promise(process.nextTick);
+
+      await expect(store.update()).rejects.toEqual(new Error("404"));
+    });
+    test("Fetch fails with 500 error message", async () => {
+      const store = {
+        bills: jest.fn().mockImplementation(() => newBill.store),
+        create: jest.fn().mockImplementation(() => Promise.resolve({})),
+        update: jest
+          .fn()
+          .mockImplementation(() => Promise.reject(new Error("500"))),
+      };
+      const newBill = new NewBill({
+        document,
+        onNavigate: (pathname) => {
+          document.body.innerHTML = ROUTES({ pathname });
+        },
+        store,
+        localStorage: window.localStorage,
+      });
+      newBill.isFormImgValid = true;
+
+      const form = screen.getByTestId("form-new-bill");
+      const handleSubmit = jest.fn((e) => newBill.handleSubmit(e));
+      form.addEventListener("submit", handleSubmit);
+
+      fireEvent.submit(form);
+      await new Promise(process.nextTick);
+
+      await expect(store.update()).rejects.toEqual(new Error("500"));
+    });
+  });
 });
