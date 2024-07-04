@@ -9,6 +9,7 @@ import mockStore from "../__mocks__/store.js";
 import router from "../app/Router.js";
 import NewBillUI from "../views/NewBillUI.js"
 import NewBill from "../containers/NewBill.js"
+
 jest.mock("../app/Store", () => mockStore)
 
 window.alert = jest.fn()
@@ -70,3 +71,122 @@ describe("Given I am connected as an employee", () => {
     })
   })
 })
+
+
+// test d'intégration POST
+describe("Given I am connected as an employee", () => {
+  beforeEach(() => {
+    Object.defineProperty(window, "localStorage", { value: localStorageMock });
+    window.localStorage.setItem(
+      "user",
+      JSON.stringify({
+        type: "Employee",
+        email: "employee@company.tld",
+      })
+    );
+
+    const root = document.createElement("div");
+    root.setAttribute("id", "root");
+    document.body.append(root);
+    router();
+    window.onNavigate(ROUTES_PATH.NewBill);
+    const html = NewBillUI();
+    document.body.innerHTML = html;
+  });
+
+  describe("When I submit the new bill form with valid data", () => {
+    test("Then it should create a new bill and redirect to Bills page", async () => {
+      const mockedCreate = jest.fn().mockResolvedValue({
+        id: "1234",
+        vat: "10",
+        fileUrl: "https://test.storage.tld/mock-file.jpg",
+        status: "pending",
+        type: "Transports",
+        commentary: "",
+        name: "Train ticket",
+        fileName: "mock-file.jpg",
+        date: "2024-07-04",
+        amount: 50,
+        commentAdmin: "",
+        email: "employee@example.com",
+        pct: 20,
+      });
+
+      const mockedUpdate = jest.fn().mockResolvedValue({
+        id: "1234",
+        vat: "10",
+        fileUrl: "https://test.storage.tld/mock-file.jpg",
+        status: "pending",
+        type: "Transports",
+        commentary: "",
+        name: "Train ticket",
+        fileName: "mock-file.jpg",
+        date: "2024-07-04",
+        amount: 50,
+        commentAdmin: "",
+        email: "employee@example.com",
+        pct: 20,
+      });
+
+      mockStore.bills = jest.fn().mockImplementation(() => ({
+        list: jest.fn().mockResolvedValue([]),
+        create: mockedCreate,
+        update: mockedUpdate,
+      }));
+
+      const newBill = new NewBill({
+        document,
+        onNavigate: (pathname) => {
+          document.body.innerHTML = pathname;
+          window.location.hash = pathname;
+        },
+        store: mockStore,
+        localStorage: window.localStorage,
+      });
+
+      // Simulate user input
+      fireEvent.change(screen.getByTestId("expense-type"), {
+        target: { value: "Transports" },
+      });
+      fireEvent.change(screen.getByTestId("expense-name"), {
+        target: { value: "Train ticket" },
+      });
+      fireEvent.change(screen.getByTestId("amount"), {
+        target: { value: "50" },
+      });
+      fireEvent.change(screen.getByTestId("datepicker"), {
+        target: { value: "2024-07-04" },
+      });
+      fireEvent.change(screen.getByTestId("vat"), {
+        target: { value: "10" },
+      });
+      fireEvent.change(screen.getByTestId("pct"), {
+        target: { value: "20" },
+      });
+
+      // Mock file upload
+      const file = new File(["mock-file.jpg"], "mock-file.jpg", {
+        type: "image/jpeg",
+      });
+      Object.defineProperty(screen.getByTestId("file"), "files", {
+        value: [file],
+      });
+      fireEvent.change(screen.getByTestId("file"));
+
+      // Simulate setting billId to ensure redirection
+      newBill.billId = "1234";
+
+      // Submit form
+      fireEvent.submit(screen.getByTestId("form-new-bill"));
+
+      // Wait for API call and redirect
+      await waitFor(() => {
+        expect(mockedCreate).toHaveBeenCalledTimes(1);
+        expect(mockedUpdate).toHaveBeenCalledTimes(1);
+        // Check navigation to Bills page
+        expect(window.location.hash).toBe(ROUTES_PATH.Bills);
+      });
+    });
+  });
+
+});
